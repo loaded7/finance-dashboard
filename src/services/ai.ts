@@ -1,7 +1,7 @@
 import { GROQ_API_KEY, GROQ_MODEL } from '../config'
 
 export async function getFinancialInsights(context: string): Promise<string> {
-  const res = await fetch('/groq-api/openai/v1/chat/completions', {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

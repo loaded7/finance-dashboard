@@ -61,7 +61,7 @@ export default function FloatingChat() {
     setInput('')
     setLoading(true)
     try {
-      const res = await fetch('/groq-api/openai/v1/chat/completions', {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
         body: JSON.stringify({
