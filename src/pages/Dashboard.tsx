@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { TrendingUp, TrendingDown, Wallet, PiggyBank } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
 import { useStore } from '../store/useStore'
@@ -7,6 +7,7 @@ import StatCard from '../components/StatCard'
 import HealthScore from '../components/HealthScore'
 import AIInsights from '../components/AIInsights'
 import Alerts from '../components/Alerts'
+import { SkeletonCard, SkeletonChart } from '../components/Skeleton'
 import { formatCurrency, categoryLabels } from '../utils/format'
 import { format, subMonths, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -15,6 +16,8 @@ const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
 
 export default function Dashboard() {
   const { transactions, investments, goals } = useStore()
+  const [loading, setLoading] = useState(true)
+  useEffect(() => { const t = setTimeout(() => setLoading(false), 400); return () => clearTimeout(t) }, [])
   const { isDark } = useTheme()
   const now = new Date()
   const monthStart = startOfMonth(now)
@@ -55,6 +58,13 @@ export default function Dashboard() {
   }, [monthTransactions])
 
   const tooltipStyle = { backgroundColor: isDark ? '#111827' : '#fff', border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`, borderRadius: 8, color: isDark ? '#f9fafb' : '#111827' }
+
+  if (loading) return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">{Array.from({length:4}).map((_,i) => <SkeletonCard key={i} />)}</div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4"><div className="lg:col-span-2"><SkeletonChart /></div><SkeletonChart /></div>
+    </div>
+  )
 
   return (
     <div className="space-y-6">
