@@ -1,7 +1,8 @@
 import { useRef } from 'react'
-import { Download, Upload, Trash2, Database } from 'lucide-react'
+import { Download, Upload, Trash2, Database, LogOut } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { useToastContext } from '../hooks/ToastContext'
+import { useAuth } from '../hooks/useAuth'
 import { formatCurrency } from '../utils/format'
 
 const STORAGE_KEYS = ['fd_transactions', 'fd_investments', 'fd_watchlist', 'fd_goals',
@@ -10,6 +11,7 @@ const STORAGE_KEYS = ['fd_transactions', 'fd_investments', 'fd_watchlist', 'fd_g
 export default function Settings() {
   const { investments, emergency, transactions } = useStore()
   const { toast } = useToastContext()
+  const { user, signOut } = useAuth()
   const fileRef = useRef<HTMLInputElement>(null)
 
   const exportBackup = () => {
@@ -70,6 +72,7 @@ export default function Settings() {
           <Database size={16} className="text-green-500" />
           <h3 className="font-semibold text-gray-900 dark:text-gray-100">Backup de Dados</h3>
         </div>
+        {user && <p className="text-xs text-gray-400">Logado como <span className="text-green-500">{user.email}</span></p>}
         <p className="text-sm text-gray-500 dark:text-gray-400">
           Exporte todos os seus dados em JSON para guardar como backup ou transferir para outro dispositivo.
         </p>
@@ -87,9 +90,14 @@ export default function Settings() {
       <div className="border border-red-500/30 bg-red-500/5 rounded-xl p-5">
         <h3 className="font-semibold text-red-400 mb-2">Zona de Perigo</h3>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Esta ação é irreversível. Todos os dados serão apagados permanentemente.</p>
-        <button onClick={clearAll} className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm transition-colors">
-          <Trash2 size={14} /> Apagar Todos os Dados
-        </button>
+        <div className="flex gap-3">
+          <button onClick={signOut} className="flex items-center gap-2 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 px-4 py-2 rounded-lg text-sm transition-colors">
+            <LogOut size={14} /> Sair da conta
+          </button>
+          <button onClick={clearAll} className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+            <Trash2 size={14} /> Apagar Todos os Dados
+          </button>
+        </div>
       </div>
     </div>
   )
