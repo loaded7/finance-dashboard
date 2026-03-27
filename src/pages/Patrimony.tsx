@@ -14,7 +14,7 @@ import { ptBR } from 'date-fns/locale'
 import type { PatrimonySnapshot } from '../types'
 
 export default function Patrimony() {
-  const { investments, emergency, transactions, patrimony, savePatrimonySnapshot, theme } = useStore()
+  const { investments, emergency, transactions, patrimony, savePatrimonySnapshot } = useStore()
   const { toast } = useToastContext()
   const { isDark } = useTheme()
 

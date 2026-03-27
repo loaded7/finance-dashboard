@@ -62,7 +62,6 @@ ${patrimony.slice(-6).map(p => `- ${p.date}: total ${formatCurrency(p.total)}`).
 
 export default function AIChat() {
   const store = useStore()
-  const { theme } = store
   const { isDark } = useTheme()
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: '👋 Olá! Sou seu assistente financeiro. Posso responder perguntas sobre suas finanças, analisar seus gastos, sugerir melhorias e muito mais. Como posso ajudar?' }
