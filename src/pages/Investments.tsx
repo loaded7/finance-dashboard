@@ -220,19 +220,83 @@ export default function Investments() {
       {showModal && (
         <Modal title={editing ? 'Editar Ativo' : 'Novo Ativo'} onClose={() => setShowModal(false)}>
           <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <input required placeholder="Nome" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={inputCls} />
-              <input required placeholder="Ticker" value={form.ticker} onChange={e => setForm(f => ({ ...f, ticker: e.target.value.toUpperCase() }))} className={inputCls} />
-            </div>
+            {/* Type selector first — drives the rest of the form */}
             <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as InvestmentType }))} className={inputCls}>
               {types.map(t => <option key={t} value={t}>{investmentTypeLabels[t]}</option>)}
             </select>
-            <div className="grid grid-cols-3 gap-3">
-              <input required type="number" min="0" step="any" placeholder="Quantidade" value={form.quantity || ''} onChange={e => setForm(f => ({ ...f, quantity: parseFloat(e.target.value) || 0 }))} className={inputCls} />
-              <input required type="number" min="0" step="any" placeholder="Preço Médio" value={form.avgPrice || ''} onChange={e => setForm(f => ({ ...f, avgPrice: parseFloat(e.target.value) || 0 }))} className={inputCls} />
-              <input required type="number" min="0" step="any" placeholder="Preço Atual" value={form.currentPrice || ''} onChange={e => setForm(f => ({ ...f, currentPrice: parseFloat(e.target.value) || 0 }))} className={inputCls} />
+
+            {/* Cripto shortcuts */}
+            {form.type === 'cripto' && (
+              <div>
+                <p className="text-xs text-gray-400 mb-2">Atalhos rápidos:</p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { symbol: 'BTC', name: 'Bitcoin' },
+                    { symbol: 'ETH', name: 'Ethereum' },
+                    { symbol: 'SOL', name: 'Solana' },
+                    { symbol: 'BNB', name: 'BNB' },
+                    { symbol: 'ADA', name: 'Cardano' },
+                    { symbol: 'XRP', name: 'XRP' },
+                  ].map(c => (
+                    <button key={c.symbol} type="button"
+                      onClick={() => setForm(f => ({ ...f, ticker: c.symbol, name: c.name }))}
+                      className={`px-3 py-1 rounded-lg text-xs border transition-colors ${form.ticker === c.symbol ? 'bg-green-500/20 border-green-500 text-green-500' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
+                      {c.symbol}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">
+                  {form.type === 'cripto' ? 'Nome da moeda' : 'Nome do ativo'}
+                </label>
+                <input required placeholder={form.type === 'cripto' ? 'ex: Bitcoin' : 'ex: Petrobras'}
+                  value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={inputCls} />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">
+                  {form.type === 'cripto' ? 'Símbolo' : form.type === 'fiis' ? 'Código do FII' : 'Ticker'}
+                </label>
+                <input required
+                  placeholder={form.type === 'cripto' ? 'ex: BTC' : form.type === 'fiis' ? 'ex: MXRF11' : 'ex: PETR4'}
+                  value={form.ticker} onChange={e => setForm(f => ({ ...f, ticker: e.target.value.toUpperCase() }))} className={inputCls} />
+              </div>
             </div>
-            <textarea placeholder="Notas (opcional)" value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className={`${inputCls} resize-none h-20`} />
+
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">
+                  {form.type === 'cripto' ? 'Quantidade (ex: 0.0022)' : 'Quantidade'}
+                </label>
+                <input required type="number" min="0" step="any"
+                  placeholder={form.type === 'cripto' ? '0.0022' : '10'}
+                  value={form.quantity || ''} onChange={e => setForm(f => ({ ...f, quantity: parseFloat(e.target.value) || 0 }))} className={inputCls} />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Preço médio (R$)</label>
+                <input required type="number" min="0" step="any"
+                  placeholder={form.type === 'cripto' ? '550000' : '28.50'}
+                  value={form.avgPrice || ''} onChange={e => setForm(f => ({ ...f, avgPrice: parseFloat(e.target.value) || 0 }))} className={inputCls} />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Preço atual (R$)</label>
+                <input required type="number" min="0" step="any"
+                  placeholder={form.type === 'cripto' ? '600000' : '30.00'}
+                  value={form.currentPrice || ''} onChange={e => setForm(f => ({ ...f, currentPrice: parseFloat(e.target.value) || 0 }))} className={inputCls} />
+              </div>
+            </div>
+
+            {form.type === 'cripto' && form.quantity > 0 && form.currentPrice > 0 && (
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2 text-xs text-gray-400">
+                Total: <span className="text-green-500 font-medium">{formatCurrency(form.quantity * form.currentPrice)}</span>
+                {' '}· {form.quantity} {form.ticker || '?'} × {formatCurrency(form.currentPrice)}
+              </div>
+            )}
+
+            <textarea placeholder="Notas (opcional)" value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className={`${inputCls} resize-none h-16`} />
             <button type="submit" className="w-full bg-green-600 hover:bg-green-500 text-white py-2 rounded-lg text-sm font-medium transition-colors">{editing ? 'Salvar' : 'Adicionar'}</button>
           </form>
         </Modal>
