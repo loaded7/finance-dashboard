@@ -23,6 +23,10 @@ export default function Investments() {
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState<Investment | null>(null)
   const [form, setForm] = useState<Omit<Investment, 'id'>>(emptyForm)
+  // String inputs to avoid parseFloat eating "0.0022" mid-typing
+  const [qtyStr, setQtyStr] = useState('')
+  const [avgStr, setAvgStr] = useState('')
+  const [curStr, setCurStr] = useState('')
   const [detailId, setDetailId] = useState<string | null>(null)
   const [showDividend, setShowDividend] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
@@ -41,9 +45,22 @@ export default function Investments() {
     finally { setLoadingQuotes(false) }
   }
 
-  const openAdd = () => { setEditing(null); setForm(emptyForm); setShowModal(true) }
-  const openEdit = (i: Investment) => { setEditing(i); setForm({ name: i.name, ticker: i.ticker, type: i.type, quantity: i.quantity, avgPrice: i.avgPrice, currentPrice: i.currentPrice, notes: i.notes || '', dividends: i.dividends || [], history: i.history || [] }); setShowModal(true) }
-  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); if (editing) updateInvestment({ ...form, id: editing.id }); else addInvestment({ ...form, id: generateId() }); setShowModal(false) }
+  const openAdd = () => { setEditing(null); setForm(emptyForm); setQtyStr(''); setAvgStr(''); setCurStr(''); setShowModal(true) }
+  const openEdit = (i: Investment) => {
+    setEditing(i)
+    setForm({ name: i.name, ticker: i.ticker, type: i.type, quantity: i.quantity, avgPrice: i.avgPrice, currentPrice: i.currentPrice, notes: i.notes || '', dividends: i.dividends || [], history: i.history || [] })
+    setQtyStr(String(i.quantity))
+    setAvgStr(String(i.avgPrice))
+    setCurStr(String(i.currentPrice))
+    setShowModal(true)
+  }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const final = { ...form, quantity: parseFloat(qtyStr) || 0, avgPrice: parseFloat(avgStr) || 0, currentPrice: parseFloat(curStr) || 0 }
+    if (editing) updateInvestment({ ...final, id: editing.id })
+    else addInvestment({ ...final, id: generateId() })
+    setShowModal(false)
+  }
 
   const detailInvestment = investments.find(i => i.id === detailId)
 
@@ -271,31 +288,37 @@ export default function Investments() {
                 <label className="text-xs text-gray-400 mb-1 block">
                   {form.type === 'cripto' ? 'Quantidade (ex: 0.0022)' : 'Quantidade'}
                 </label>
-                <input required type="number" min="0" step="any"
+                <input required type="text" inputMode="decimal"
                   placeholder={form.type === 'cripto' ? '0.0022' : '10'}
-                  value={form.quantity || ''} onChange={e => setForm(f => ({ ...f, quantity: parseFloat(e.target.value) || 0 }))} className={inputCls} />
+                  value={qtyStr}
+                  onChange={e => { const v = e.target.value.replace(',', '.'); if (/^[0-9]*\.?[0-9]*$/.test(v)) setQtyStr(v) }}
+                  className={inputCls} />
                 <p className="text-xs text-gray-500 mt-1">Quanto você tem</p>
               </div>
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">Preço médio (R$)</label>
-                <input required type="number" min="0" step="any"
+                <input required type="text" inputMode="decimal"
                   placeholder={form.type === 'cripto' ? '550000' : '28.50'}
-                  value={form.avgPrice || ''} onChange={e => setForm(f => ({ ...f, avgPrice: parseFloat(e.target.value) || 0 }))} className={inputCls} />
+                  value={avgStr}
+                  onChange={e => { const v = e.target.value.replace(',', '.'); if (/^[0-9]*\.?[0-9]*$/.test(v)) setAvgStr(v) }}
+                  className={inputCls} />
                 <p className="text-xs text-gray-500 mt-1">Quanto pagou por 1 unidade</p>
               </div>
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">Preço atual (R$)</label>
-                <input required type="number" min="0" step="any"
+                <input required type="text" inputMode="decimal"
                   placeholder={form.type === 'cripto' ? '600000' : '30.00'}
-                  value={form.currentPrice || ''} onChange={e => setForm(f => ({ ...f, currentPrice: parseFloat(e.target.value) || 0 }))} className={inputCls} />
+                  value={curStr}
+                  onChange={e => { const v = e.target.value.replace(',', '.'); if (/^[0-9]*\.?[0-9]*$/.test(v)) setCurStr(v) }}
+                  className={inputCls} />
                 <p className="text-xs text-gray-500 mt-1">Quanto vale hoje</p>
               </div>
             </div>
 
-            {form.type === 'cripto' && form.quantity > 0 && form.currentPrice > 0 && (
+            {form.type === 'cripto' && parseFloat(qtyStr) > 0 && parseFloat(curStr) > 0 && (
               <div className="bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2 text-xs text-gray-400">
-                Total: <span className="text-green-500 font-medium">{formatCurrency(form.quantity * form.currentPrice)}</span>
-                {' '}· {form.quantity} {form.ticker || '?'} × {formatCurrency(form.currentPrice)}
+                Total: <span className="text-green-500 font-medium">{formatCurrency(parseFloat(qtyStr) * parseFloat(curStr))}</span>
+                {' '}· {qtyStr} {form.ticker || '?'} × {formatCurrency(parseFloat(curStr))}
               </div>
             )}
 
