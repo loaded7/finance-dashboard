@@ -27,6 +27,9 @@ export default function Investments() {
   const [qtyStr, setQtyStr] = useState('')
   const [avgStr, setAvgStr] = useState('')
   const [curStr, setCurStr] = useState('')
+  // USD converter helper
+  const [usdAmount, setUsdAmount] = useState('')
+  const [usdRate, setUsdRate] = useState('5.80')
   const [detailId, setDetailId] = useState<string | null>(null)
   const [showDividend, setShowDividend] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
@@ -244,23 +247,64 @@ export default function Investments() {
 
             {/* Cripto shortcuts */}
             {form.type === 'cripto' && (
-              <div>
-                <p className="text-xs text-gray-400 mb-2">Atalhos rápidos:</p>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { symbol: 'BTC', name: 'Bitcoin' },
-                    { symbol: 'ETH', name: 'Ethereum' },
-                    { symbol: 'SOL', name: 'Solana' },
-                    { symbol: 'BNB', name: 'BNB' },
-                    { symbol: 'ADA', name: 'Cardano' },
-                    { symbol: 'XRP', name: 'XRP' },
-                  ].map(c => (
-                    <button key={c.symbol} type="button"
-                      onClick={() => setForm(f => ({ ...f, ticker: c.symbol, name: c.name }))}
-                      className={`px-3 py-1 rounded-lg text-xs border transition-colors ${form.ticker === c.symbol ? 'bg-green-500/20 border-green-500 text-green-500' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
-                      {c.symbol}
-                    </button>
-                  ))}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-gray-400 mb-2">Atalhos rápidos:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { symbol: 'BTC', name: 'Bitcoin' },
+                      { symbol: 'ETH', name: 'Ethereum' },
+                      { symbol: 'SOL', name: 'Solana' },
+                      { symbol: 'BNB', name: 'BNB' },
+                      { symbol: 'ADA', name: 'Cardano' },
+                      { symbol: 'XRP', name: 'XRP' },
+                    ].map(c => (
+                      <button key={c.symbol} type="button"
+                        onClick={() => setForm(f => ({ ...f, ticker: c.symbol, name: c.name }))}
+                        className={`px-3 py-1 rounded-lg text-xs border transition-colors ${form.ticker === c.symbol ? 'bg-green-500/20 border-green-500 text-green-500' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
+                        {c.symbol}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* USD to BRL converter */}
+                <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-3">
+                  <p className="text-xs text-blue-400 font-medium mb-2">💡 Investiu em dólar? Converta aqui</p>
+                  <div className="grid grid-cols-3 gap-2 mb-2">
+                    <div>
+                      <label className="text-xs text-gray-400 mb-1 block">Valor em USD ($)</label>
+                      <input type="text" inputMode="decimal" placeholder="150"
+                        value={usdAmount}
+                        onChange={e => { const v = e.target.value.replace(',', '.'); if (/^[0-9]*\.?[0-9]*$/.test(v)) setUsdAmount(v) }}
+                        className={inputCls} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 mb-1 block">Cotação do dólar</label>
+                      <input type="text" inputMode="decimal" placeholder="5.80"
+                        value={usdRate}
+                        onChange={e => { const v = e.target.value.replace(',', '.'); if (/^[0-9]*\.?[0-9]*$/.test(v)) setUsdRate(v) }}
+                        className={inputCls} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-400 mb-1 block">= em reais</label>
+                      <div className={`${inputCls} bg-gray-100 dark:bg-gray-700 text-green-500 font-medium`}>
+                        {usdAmount && usdRate ? formatCurrency(parseFloat(usdAmount) * parseFloat(usdRate)) : '—'}
+                      </div>
+                    </div>
+                  </div>
+                  {usdAmount && usdRate && avgStr && (
+                    <div className="text-xs text-gray-400">
+                      Quantidade calculada: <span className="text-green-500 font-medium">
+                        {((parseFloat(usdAmount) * parseFloat(usdRate)) / parseFloat(avgStr)).toFixed(8).replace(/\.?0+$/, '')} {form.ticker}
+                      </span>
+                      <button type="button"
+                        onClick={() => setQtyStr(((parseFloat(usdAmount) * parseFloat(usdRate)) / parseFloat(avgStr)).toFixed(8).replace(/\.?0+$/, ''))}
+                        className="ml-2 text-blue-400 hover:text-blue-300 underline">
+                        usar este valor
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
