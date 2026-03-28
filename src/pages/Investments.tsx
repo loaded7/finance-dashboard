@@ -274,18 +274,21 @@ export default function Investments() {
                 <input required type="number" min="0" step="any"
                   placeholder={form.type === 'cripto' ? '0.0022' : '10'}
                   value={form.quantity || ''} onChange={e => setForm(f => ({ ...f, quantity: parseFloat(e.target.value) || 0 }))} className={inputCls} />
+                <p className="text-xs text-gray-500 mt-1">Quanto você tem</p>
               </div>
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">Preço médio (R$)</label>
                 <input required type="number" min="0" step="any"
                   placeholder={form.type === 'cripto' ? '550000' : '28.50'}
                   value={form.avgPrice || ''} onChange={e => setForm(f => ({ ...f, avgPrice: parseFloat(e.target.value) || 0 }))} className={inputCls} />
+                <p className="text-xs text-gray-500 mt-1">Quanto pagou por 1 unidade</p>
               </div>
               <div>
                 <label className="text-xs text-gray-400 mb-1 block">Preço atual (R$)</label>
                 <input required type="number" min="0" step="any"
                   placeholder={form.type === 'cripto' ? '600000' : '30.00'}
                   value={form.currentPrice || ''} onChange={e => setForm(f => ({ ...f, currentPrice: parseFloat(e.target.value) || 0 }))} className={inputCls} />
+                <p className="text-xs text-gray-500 mt-1">Quanto vale hoje</p>
               </div>
             </div>
 
